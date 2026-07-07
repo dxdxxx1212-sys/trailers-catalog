@@ -4,7 +4,30 @@
 Описания генерируются из фактов (характеристик), маркетинговый текст источника НЕ используется."""
 import json, re, html
 
-src = json.load(open('source.json', encoding='utf-8'))
+src = json.load(open('merged_source.json', encoding='utf-8'))
+
+def brand_of(name):
+    n = name.lower()
+    table = [('МЗСА','мзса'),('Титан','титан'),('Кремень','кремень'),('Трейлер','трейлер|treiler'),
+             ('ССТ','сст|sst'),('Avtos','avtos|автос'),('Экспедиция','экспедици'),
+             ('MULLERWAGEN','mullerwagen|мюллер'),('Уралец','уралец|uralets'),('Славич','славич'),
+             ('Русич','русич|rusich'),('LAV','\\blav\\b|лав '),('RINAL','rinal'),('Атлет','атлет|atlet'),
+             ('Спутник','спутник|sputnik'),('ДОН','\\bдон\\b'),('Багем','багем'),('ИСТОК','исток|istok'),
+             ('Партнёр','партнер|partner'),('Композит','композит|kompozit'),('Викинг','викинг|viking'),
+             ('Крепыш','крепыш'),('ALASKA','alaska|аляска'),('GTS','\\bgts\\b'),('Кремень','кремень')]
+    for b, rx in table:
+        if re.search(rx, n):
+            return b
+    return 'Другой'
+
+def has_brake(specs, name):
+    for s in specs:
+        low = s.lower()
+        if 'тормоз' in low:
+            return 'без' not in low
+    if 'тормоз' in name.lower():
+        return True
+    return False
 
 def num(s):
     m = re.search(r'(\d[\d\s]*)', s.replace(' ', ' '))
@@ -99,10 +122,12 @@ def derive(p):
         'old': p.get('old'),
         'img': (p['imgs'][0] if p['imgs'] else ''),
         'imgs': p['imgs'][:5],
+        'brand': brand_of(name),
         'kind': kind,
         'axes': axes,
         'gruz': gruz,
         'massa': massa,
+        'brake': has_brake(specs, name),
         'descr': descr,
         'specs': specs,
     }

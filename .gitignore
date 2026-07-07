@@ -3,3 +3,9 @@
 serve.py
 source.json
 products.js
+
+# рабочие файлы сбора
+keep-full.json
+batch2.json
+merged_source.json
+shortlist230.json
