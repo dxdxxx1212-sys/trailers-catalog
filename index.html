@@ -150,10 +150,19 @@ footer a{color:#cfd9e0;text-decoration:none}
 @media(max-width:560px){
   body{font-size:16px}
   .hd-phone{display:none}
-  .card .nm{min-height:0}
-  .card .pr .now{font-size:20px}
+  .hd{gap:10px;height:60px}
+  .logo{font-size:18px;gap:8px}
+  .logo .mark{width:30px;height:30px;font-size:16px}
+  .hide-sm{display:none}
+  .hd-cta{padding:10px 15px;font-size:15px}
+  .card .nm{min-height:0;font-size:15px}
+  .card .pr .now{font-size:19px}
   .card .row{flex-direction:column}
+  .card .body{padding:12px}
   .lead{padding:24px 18px}.lead h2{font-size:22px}
+  .hero{padding:26px 0 20px}
+  .hero .row .btn{flex:1}
+  .hero .row{display:flex}
 }
 .close-f{display:none}
 </style>
@@ -165,14 +174,14 @@ footer a{color:#cfd9e0;text-decoration:none}
     <div class="logo"><span class="mark">🚚</span> Прицеп<b>Маркет</b></div>
     <div class="hd-sp"></div>
     <a class="hd-phone" href="tel:+70000000000">8 (800) 000-00-00</a>
-    <button class="btn" data-lead>Подобрать прицеп</button>
+    <button class="btn hd-cta" data-lead>Подобрать<span class="hide-sm"> прицеп</span></button>
   </div>
 </header>
 
 <section class="hero">
   <div class="wrap">
     <h1>Каталог легковых прицепов</h1>
-    <p>Более 120 моделей: бортовые, с тентом, с крышкой, для лодок и мототехники. Поможем подобрать под вашу задачу и бюджет.</p>
+    <p>Более 200 моделей: бортовые, с тентом, с крышкой, для лодок и мототехники. Поможем подобрать под вашу задачу и бюджет.</p>
     <div class="row">
       <button class="btn btn-lg" data-lead>Помочь с выбором</button>
       <button class="btn btn-lg btn-ghost" data-scroll="#catalog">Смотреть каталог</button>
