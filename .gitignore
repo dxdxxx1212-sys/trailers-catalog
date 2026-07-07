@@ -1,0 +1,5 @@
+.DS_Store
+.claude/
+serve.py
+source.json
+products.js
