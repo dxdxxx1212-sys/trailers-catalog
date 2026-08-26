@@ -381,7 +381,7 @@ function card(p){
       <div class="sp"></div>
       <div class="pr"><span class="now">${money(p.price)}</span>${p.old&&p.old>p.price?`<span class="old">${money(p.old)}</span>`:''}</div>
       <div class="row">
-        <a class="btn btn-ghost" href="?p=${p.id}" data-more="${p.id}">Подробнее</a>
+        <a class="btn btn-ghost" href="?p=${productSlug(p)}" data-more="${p.id}">Подробнее</a>
         <button class="btn btn-green" data-order="${p.id}">Заказать</button>
       </div>
     </div>
@@ -415,7 +415,7 @@ function openModal(id, push){
     </div>`;
   $('#modal').classList.add('on');
   document.body.style.overflow='hidden';
-  if(push!==false){ try{ history.pushState({p:String(id)}, '', '?p='+id); }catch(e){} }
+  if(push!==false){ try{ history.pushState({p:p.id}, '', '?p='+productSlug(p)); }catch(e){} }
 }
 function closeModal(sync){$('#modal').classList.remove('on');document.body.style.overflow='';if(sync!==false && /[?&]p=/.test(location.search)){try{history.pushState({},'',location.pathname);}catch(e){}}}
 
@@ -500,8 +500,13 @@ $('#tCount') && ($('#tCount').textContent = P.length);
 renderFilters();
 render();
 
-/* ---- deep-links: товар открывается по прямой ссылке ?p=ID ---- */
-function productLink(id){ return location.origin + location.pathname + '?p=' + id; }
+/* ---- deep-links: человекочитаемая ссылка ?p=slug-ID (id в конце — для точности) ---- */
+function slugify(s){
+  const map={'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'};
+  return (s||'').toString().toLowerCase().split('').map(c=>map[c]!==undefined?map[c]:c).join('').replace(/[^a-z0-9]+/g,'-').replace(/(^-+|-+$)/g,'').replace(/-+/g,'-');
+}
+function productSlug(p){ return (slugify(p.name)||'pricep')+'-'+p.id; }
+function productLink(id){ const p=P.find(x=>x.id==id); return location.origin + location.pathname + '?p=' + (p?productSlug(p):id); }
 function copyProductLink(id){
   const url = productLink(id);
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -514,9 +519,10 @@ function fallbackCopy(url){
   t.remove();
 }
 function openFromURL(){
-  const id = new URLSearchParams(location.search).get('p');
-  if(id && P.find(x=>x.id==id)) openModal(id, false);
-  else closeModal(false);
+  const raw = new URLSearchParams(location.search).get('p');
+  if(raw){ const m = String(raw).match(/(\d+)$/); const id = m ? m[1] : raw;
+    if(P.find(x=>x.id==id)){ openModal(id, false); return; } }
+  closeModal(false);
 }
 window.addEventListener('popstate', openFromURL);
 openFromURL();
