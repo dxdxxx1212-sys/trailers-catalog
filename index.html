@@ -381,7 +381,7 @@ function card(p){
       <div class="sp"></div>
       <div class="pr"><span class="now">${money(p.price)}</span>${p.old&&p.old>p.price?`<span class="old">${money(p.old)}</span>`:''}</div>
       <div class="row">
-        <button class="btn btn-ghost" data-more="${p.id}">Подробнее</button>
+        <a class="btn btn-ghost" href="?p=${p.id}" data-more="${p.id}">Подробнее</a>
         <button class="btn btn-green" data-order="${p.id}">Заказать</button>
       </div>
     </div>
@@ -389,7 +389,7 @@ function card(p){
 }
 
 /* ---- модалка ---- */
-function openModal(id){
+function openModal(id, push){
   const p = P.find(x=>x.id==id); if(!p) return;
   $('#mTitle').textContent = p.name;
   const imgs = (p.imgs&&p.imgs.length?p.imgs:[p.img]).filter(Boolean);
@@ -409,13 +409,15 @@ function openModal(id){
       <table class="spec">${specRows}</table>
       <div class="cta">
         <button class="btn btn-lg btn-green" data-order="${p.id}">Заказать этот прицеп</button>
+        <button class="btn btn-lg btn-ghost" data-copylink="${p.id}">🔗 Скопировать ссылку</button>
         <button class="btn btn-lg btn-ghost" data-lead>Задать вопрос</button>
       </div>
     </div>`;
   $('#modal').classList.add('on');
   document.body.style.overflow='hidden';
+  if(push!==false){ try{ history.pushState({p:String(id)}, '', '?p='+id); }catch(e){} }
 }
-function closeModal(){$('#modal').classList.remove('on');document.body.style.overflow='';}
+function closeModal(sync){$('#modal').classList.remove('on');document.body.style.overflow='';if(sync!==false && /[?&]p=/.test(location.search)){try{history.pushState({},'',location.pathname);}catch(e){}}}
 
 /* ---- заявки (пока заглушка, бэкенд подключим позже) ---- */
 function sendLead(data){
@@ -435,9 +437,10 @@ document.addEventListener('click', e=>{
     else if(state[f]&&state[f].delete){state[f].delete(v);}
     state.shown=PAGE; renderFilters(); syncFilterInputs(); render(); return;
   }
-  const t = e.target.closest('[data-more],[data-order],[data-lead],[data-scroll],[data-closem],[data-openf],[data-closef],[data-reset]');
+  const t = e.target.closest('[data-more],[data-order],[data-lead],[data-scroll],[data-closem],[data-openf],[data-closef],[data-reset],[data-copylink]');
   if(!t) return;
-  if(t.dataset.more){openModal(t.dataset.more);}
+  if(t.dataset.more){e.preventDefault();openModal(t.dataset.more);}
+  else if(t.dataset.copylink){e.preventDefault();copyProductLink(t.dataset.copylink);}
   else if(t.dataset.order){const p=P.find(x=>x.id==t.dataset.order);openLeadFor(p);}
   else if(t.hasAttribute('data-lead')){openLeadFor(null);}
   else if(t.dataset.scroll){e.preventDefault();document.querySelector(t.dataset.scroll)?.scrollIntoView({behavior:'smooth'});}
@@ -496,6 +499,27 @@ $('#tCount').textContent = P.length+'+';
 $('#tCount') && ($('#tCount').textContent = P.length);
 renderFilters();
 render();
+
+/* ---- deep-links: товар открывается по прямой ссылке ?p=ID ---- */
+function productLink(id){ return location.origin + location.pathname + '?p=' + id; }
+function copyProductLink(id){
+  const url = productLink(id);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>showToast('🔗 Ссылка на товар скопирована')).catch(()=>fallbackCopy(url));
+  } else fallbackCopy(url);
+}
+function fallbackCopy(url){
+  const t=document.createElement('input'); t.value=url; document.body.appendChild(t); t.select();
+  try{ document.execCommand('copy'); showToast('🔗 Ссылка на товар скопирована'); }catch(e){ prompt('Скопируйте ссылку на товар:', url); }
+  t.remove();
+}
+function openFromURL(){
+  const id = new URLSearchParams(location.search).get('p');
+  if(id && P.find(x=>x.id==id)) openModal(id, false);
+  else closeModal(false);
+}
+window.addEventListener('popstate', openFromURL);
+openFromURL();
 </script>
 </body>
 </html>
