@@ -515,7 +515,8 @@ function slugify(s){
   return (s||'').toString().toLowerCase().split('').map(c=>map[c]!==undefined?map[c]:c).join('').replace(/[^a-z0-9]+/g,'-').replace(/(^-+|-+$)/g,'').replace(/-+/g,'-');
 }
 function productSlug(p){ return (slugify(p.name)||'pricep')+'-'+p.id; }
-function productLink(id){ const p=P.find(x=>x.id==id); return location.origin + location.pathname + '?p=' + (p?productSlug(p):id); }
+function prettyOrigin(){ var h=location.hostname; return (h==='xn--80aajzhsz.xn----ctbklixakchgm2d.xn--p1ai'||h==='каталог.восток-прицеп.рф') ? 'https://каталог.восток-прицеп.рф' : location.origin; }
+function productLink(id){ const p=P.find(x=>x.id==id); return prettyOrigin() + location.pathname + '?p=' + (p?productSlug(p):id); }
 function copyProductLink(id){
   const url = productLink(id);
   if(navigator.clipboard && navigator.clipboard.writeText){
