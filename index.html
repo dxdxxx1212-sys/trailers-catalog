@@ -403,11 +403,27 @@ function openModal(id, push){
   const p = P.find(x=>x.id==id); if(!p) return;
   $('#mTitle').textContent = p.name;
   const imgs = (p.imgs&&p.imgs.length?p.imgs:[p.img]).filter(Boolean);
-  const specRows = (p.specs||[]).map(s=>{
-    const m = s.match(/^(.*?)([\d«].*)$/);
-    return m ? `<tr><td>${esc(m[1].trim())}</td><td>${esc(m[2].trim())}</td></tr>`
-             : `<tr><td colspan="2">${esc(s)}</td></tr>`;
-  }).join('');
+  const pairs = [];
+  (p.specs||[]).forEach(s=>{
+    const idx = s.indexOf(':');
+    if (idx < 1) return;                            // строка без метки (реклама/проза) — пропускаем
+    const label = s.slice(0, idx).trim();
+    const value = s.slice(idx+1).trim();
+    if (!value) return;                             // пустое значение — пропускаем
+    const lkey = label.toLowerCase().replace(/ё/g,'е').replace(/,?\s*(мм|кг|м|л|шт)\.?$/,'').trim();
+    const ex = pairs.find(x=>x.lkey===lkey);
+    if (ex){ if (/\d/.test(value) && !/\d/.test(ex.value)) ex.value = value; return; } // дубль метки: берём с цифрой
+    pairs.push({lkey, label, value});
+  });
+  const seenDim = new Set();                        // убрать повторяющиеся габариты под разными метками
+  const specRows = pairs.filter(x=>{
+    if (/[×xх]/.test(x.value)){
+      const k = x.value.replace(/\D/g,'');
+      if (seenDim.has(k)) return false;
+      seenDim.add(k);
+    }
+    return true;
+  }).map(x=>`<tr><td>${esc(x.label)}</td><td>${esc(x.value)}</td></tr>`).join('');
   $('#mBody').innerHTML = `
     <div class="gal">
       <div class="main" id="galMain" style="background-image:url('${imgs[0]||''}')"></div>
